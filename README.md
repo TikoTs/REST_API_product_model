@@ -10,9 +10,9 @@ Before diving into the application, ensure to migrate the database:
 python manage.py migrate
 ```
 
-### Creating the Product App
+### Run the project
 
-Execute the following command to create the product app:
+Execute the following command to run the product app:
 
 ```bash
  python manage.py runserver  

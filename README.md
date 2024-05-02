@@ -1,4 +1,4 @@
-This is Django REST Framework Product App. This repository houses a Django application designed to streamline product-category management using the Django Rest Framework.
+This is a Django REST Framework Product App. This repository houses a Django application designed to streamline product-category management using the Django Rest Framework.
 
 ## Usage
 

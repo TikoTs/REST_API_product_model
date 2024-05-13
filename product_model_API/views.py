@@ -47,7 +47,7 @@ class ProductListView(ListAPIView):
 class ProductDeleteView(DestroyAPIView, RetrieveSerializedMixin):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
-    lookup_url_kwarg = 'pk'
+    lookup_url_kwarg = "pk"
 
     def get(self, request, *args, **kwargs):
         instance = self.get_object()
@@ -59,7 +59,7 @@ class ProductDeleteView(DestroyAPIView, RetrieveSerializedMixin):
         self.perform_destroy(instance)
         return Response(
             {"message": "Product was deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT
+            status=status.HTTP_204_NO_CONTENT,
         )
 
 
@@ -72,14 +72,3 @@ class ProductUpdateView(UpdateAPIView, RetrieveSerializedMixin):
         instance = self.get_object()
         serialized_data = self.get_serialized_object(instance)
         return Response(serialized_data)
-
-
-class ProductUpdateView(UpdateAPIView):
-    queryset = Product.objects.all()
-    serializer_class = ProductUpdateSerializer
-    lookup_url_kwarg = "pk"
-
-    def get(self, request, *args, **kwargs):
-        instance = self.get_object()
-        serializer = self.get_serializer(instance)
-        return Response(serializer.data)

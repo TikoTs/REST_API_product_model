@@ -4,10 +4,9 @@ from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
     ListAPIView,
+    DestroyAPIView,
 )
 from rest_framework.response import Response
-from rest_framework.views import APIView
-
 from product_model_API.models import Product
 
 from product_model_API.serializers import (
@@ -15,6 +14,7 @@ from product_model_API.serializers import (
     ProductListSerializer,
     ProductUpdateSerializer,
 )
+from product_model_API.mixins import RetrieveSerializedMixin
 
 
 class ProductCreateView(CreateAPIView):
@@ -23,17 +23,13 @@ class ProductCreateView(CreateAPIView):
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
-        if serializer.is_valid():
-            self.perform_create(serializer)
-            headers = self.get_success_headers(serializer.data)
-            return Response(
-                {"message": "Product created successfully."},
-                status=status.HTTP_201_CREATED,
-                headers=headers,
-            )
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
         return Response(
-            {"error": "Unable to create the product."},
-            status=status.HTTP_400_BAD_REQUEST,
+            {"message": "Product created successfully.", "data": serializer.data},
+            status=status.HTTP_201_CREATED,
+            headers=headers,
         )
 
 
@@ -48,34 +44,42 @@ class ProductListView(ListAPIView):
     serializer_class = ProductListSerializer
 
 
-class ProductDeleteView(APIView):
-    def get(self, request, pk):
-        try:
-            product = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
-            )
+class ProductDeleteView(DestroyAPIView, RetrieveSerializedMixin):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
+    lookup_url_kwarg = 'pk'
 
-        serializer = ProductSerializer(product)
-        return Response(serializer.data)
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serialized_data = self.get_serialized_object(instance)
+        return Response(serialized_data)
 
-    def delete(self, request, pk):
-        try:
-            product = Product.objects.get(pk=pk)
-        except Product.DoesNotExist:
-            return Response(
-                {"error": "Product not found"}, status=status.HTTP_404_NOT_FOUND
-            )
-
-        product.delete()
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        self.perform_destroy(instance)
         return Response(
             {"message": "Product was deleted successfully"},
-            status=status.HTTP_204_NO_CONTENT,
+            status=status.HTTP_204_NO_CONTENT
         )
+
+
+class ProductUpdateView(UpdateAPIView, RetrieveSerializedMixin):
+    queryset = Product.objects.all()
+    serializer_class = ProductUpdateSerializer
+    lookup_url_kwarg = "pk"
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serialized_data = self.get_serialized_object(instance)
+        return Response(serialized_data)
 
 
 class ProductUpdateView(UpdateAPIView):
     queryset = Product.objects.all()
     serializer_class = ProductUpdateSerializer
     lookup_url_kwarg = "pk"
+
+    def get(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        return Response(serializer.data)

@@ -3,14 +3,14 @@ from django.utils.translation import gettext_lazy as _
 
 
 class Product(models.Model):
+    category = models.ForeignKey(
+        "Category", on_delete=models.CASCADE, verbose_name=_("Category")
+    )
     name = models.CharField(max_length=200, verbose_name=_("Product name"), unique=True)
     price = models.DecimalField(
         max_digits=10, decimal_places=2, verbose_name=_("Price")
     )
     supply = models.IntegerField(verbose_name=_("Supply"))
-    category = models.ForeignKey(
-        "Category", on_delete=models.CASCADE, verbose_name=_("Category")
-    )
 
     class Meta:
         verbose_name = _("Product")
